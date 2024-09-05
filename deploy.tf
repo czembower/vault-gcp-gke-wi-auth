@@ -51,6 +51,12 @@ variable "vault_address" {
   description = "Vault cluster API address"
 }
 
+variable "vault_gcp_auth_mount_path" {
+  type        = string
+  description = "Vault GCP auth mount path"
+  default     = "gcp"
+}
+
 resource "kubernetes_namespace" "vault" {
   metadata {
     annotations = {
@@ -174,6 +180,10 @@ resource "kubernetes_job_v1" "token_helper" {
           env {
             name  = "VAULT_ADDR"
             value = var.vault_address
+          }
+          env {
+            name  = "VAULT_GCP_AUTH_MOUNT_PATH"
+            value = var.vault_gcp_auth_mount_path
           }
           env {
             name  = "VAULT_SKIP_VERIFY"

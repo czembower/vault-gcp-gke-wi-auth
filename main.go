@@ -226,7 +226,9 @@ func gcpAuthToVault(ctx context.Context, idToken string, config GCPTokenExchange
 	c, err := client.Auth.GoogleCloudLogin(ctx, schema.GoogleCloudLoginRequest{
 		Jwt:  idToken,
 		Role: config.VaultRole,
-	})
+	},
+		vault.WithMountPath(os.Getenv("VAULT_GCP_AUTH_MOUNT_PATH")),
+	)
 	if err != nil {
 		return "", err
 	}
