@@ -11,7 +11,7 @@ To operate successfully, a number of prerequisites must be met:
 - GCP IAM mapping that associates a Kubernetes service account and namespace
 with a Google Service Account
 - Kubernetes service account associated with this container that is annotated in
-such that it assumes the target Google Service Account identity
+such a way that it assumes the target Google Service Account identity
 - A Kubernetes role and rolebinding that grants the Kubernetes service account
 the ability to read service accounts and generate service account tokens
 - A healthy Vault cluster with an appropriately configured GCP auth method
