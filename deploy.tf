@@ -66,23 +66,23 @@ resource "kubernetes_namespace" "vault" {
   }
 }
 
-resource "google_service_account" "gke_token_helper_service_account" {
+resource "google_service_account" "gke_vggwa_service_account" {
   account_id   = "vggwa-wi-sa"
   display_name = "GKE vggwa Service Account"
 }
 
-resource "google_project_iam_member" "gke_token_helper_workload_identity" {
+resource "google_project_iam_member" "gke_vggwa_workload_identity" {
   project = var.gcp_project_id
   role    = "roles/iam.workloadIdentityUser"
   member  = "serviceAccount:${var.gcp_project_id}.svc.id.goog[vault/vggwa]"
 }
 
-resource "kubernetes_service_account_v1" "token_helper" {
+resource "kubernetes_service_account_v1" "vggwa" {
   metadata {
     name      = "vggwa"
     namespace = kubernetes_namespace.vault.metadata[0].name
     annotations = {
-      "iam.gke.io/gcp-service-account" = "${google_service_account.gke_token_helper_service_account.email}"
+      "iam.gke.io/gcp-service-account" = "${google_service_account.gke_vggwa_service_account.email}"
     }
   }
 }
@@ -111,7 +111,7 @@ data "template_file" "docker_config_script" {
   }
 }
 
-resource "kubernetes_role_v1" "token_helper" {
+resource "kubernetes_role_v1" "vggwa" {
   metadata {
     name      = "vggwa"
     namespace = kubernetes_namespace.vault.metadata[0].name
@@ -130,7 +130,7 @@ resource "kubernetes_role_v1" "token_helper" {
   }
 }
 
-resource "kubernetes_role_binding_v1" "token_helper" {
+resource "kubernetes_role_binding_v1" "vggwa" {
   metadata {
     name      = "vggwa"
     namespace = kubernetes_namespace.vault.metadata[0].name
@@ -138,17 +138,17 @@ resource "kubernetes_role_binding_v1" "token_helper" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "Role"
-    name      = kubernetes_role_v1.token_helper.metadata[0].name
+    name      = kubernetes_role_v1.vggwa.metadata[0].name
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.token_helper.metadata[0].name
+    name      = kubernetes_service_account_v1.vggwa.metadata[0].name
     namespace = kubernetes_namespace.vault.metadata[0].name
     api_group = ""
   }
 }
 
-resource "kubernetes_job_v1" "token_helper" {
+resource "kubernetes_job_v1" "vggwa" {
 
   metadata {
     name      = "vggwa"
@@ -158,7 +158,7 @@ resource "kubernetes_job_v1" "token_helper" {
     template {
       metadata {}
       spec {
-        service_account_name = kubernetes_service_account_v1.token_helper.metadata[0].name
+        service_account_name = kubernetes_service_account_v1.vggwa.metadata[0].name
         image_pull_secrets {
           name = kubernetes_secret_v1.ghcr.metadata[0].name
         }
